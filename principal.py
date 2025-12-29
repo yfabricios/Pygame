@@ -6,9 +6,9 @@ pygame.init()
 # Criação da Janela
 screen = pygame.display.set_mode((1000, 563))
 
-
-# fps
-fps = pygame.time.Clock()
+#definir taxa de quadros
+clock = pygame.time.Clock()
+fps = 60
 
 # Nome do Jogo
 pygame.display.set_caption('Pixel Fight')
@@ -25,6 +25,8 @@ personagem_2 = Personagens(700, 260)
 # game loop
 andamento = True
 while andamento:
+
+    clock.tick(fps)
 
 # desenho do fundo de andamento
     desenho_fundo()
@@ -48,7 +50,5 @@ while andamento:
 
 # Desenvolvimento 1
 
-# fps
-    fps.tick(60)
 
 pygame.quit()
