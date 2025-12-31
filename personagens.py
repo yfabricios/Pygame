@@ -4,26 +4,37 @@ class Personagens():
     def __init__(self, x, y):
         self.rect = pygame.Rect((x, y, 80, 180))
         self.vel_y = 0
-        self.jump = False
+        self.pulo = False
+        self.atacando = False
+        self.tipo_de_ataque = 0
 
-    def move(self):
-        velociade = 10
+    def move(self, tela_largura, tela_altura, superface, alvo):
+        velocidade = 10
         gravidade = 2
         dx = 0
         dy = 0
 
 # Precionamento das teclas
         key = pygame.key.get_pressed()
-
-# Movimento
-        if key[pygame.K_a]:
-            dx = -velociade
-        if key[pygame.K_d]:
-            dx = velociade
-#pulo
-        if key[pygame.K_w] and self.jump == False:
-            self.vel_y = -30
-            self.jump = True
+#só pode fazer outras ações se não estiver atacando
+        if self.atacando == False:
+    # Movimento
+            if key[pygame.K_a]:
+                dx = -velocidade
+            if key[pygame.K_d]:
+                dx = velocidade
+    #pulo
+            if key[pygame.K_w] and self.pulo == False:
+                self.vel_y = -30
+                self.pulo = True
+    #ataques
+            if key[pygame.K_r] or key[pygame.K_t]:
+                self.ataque(superface, alvo)
+                #determinar o tipo de ataque que será usado
+                if key[pygame.K_r]:
+                    self.tipo_de_ataque = 1
+                if key[pygame.K_t]:
+                    self.tipo_de_ataque = 2
 #aplicar gravidade
         self.vel_y += gravidade
         dy += self.vel_y
@@ -31,16 +42,24 @@ class Personagens():
 #garantir que o player não saia da tela
         if self.rect.left + dx < 0:
             dx = -self.rect.left
-        if self.rect.right + dx > 1000:
-            dx = 1000 - self.rect.right
-        if self.rect.bottom + dy > 453:
+        if self.rect.right + dx > tela_largura:
+            dx = tela_largura - self.rect.right
+        if self.rect.bottom + dy > (tela_altura - 110):
             self.vel_y = 0
-            self.jump = False
-            dy = 463 - self.rect.bottom
+            self.pulo = False
+            dy = (tela_altura - 110) - self.rect.bottom
 
 # uptade da posição do player
         self.rect.x += dx
         self.rect.y += dy
+
+    def ataque(self, superface, alvo):
+        self.atacando = True
+        retangulo_de_ataque = pygame.Rect(self.rect.centerx, self.rect.y, 2*self.rect.width, self.rect.height)
+        if retangulo_de_ataque.colliderect(alvo.rect):
+            print("hit")
+
+        pygame.draw.rect(superface, (0, 255, 0), retangulo_de_ataque)
 
     def desenho(self, superface):
         pygame.draw.rect(superface, (255, 0, 0), self.rect)

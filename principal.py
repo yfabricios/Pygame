@@ -4,7 +4,9 @@ from personagens import Personagens
 pygame.init()
 
 # Criação da Janela
-screen = pygame.display.set_mode((1000, 563))
+tela_largura = 1000
+tela_altura = 563
+screen = pygame.display.set_mode((tela_largura, tela_altura))
 
 #definir taxa de quadros
 clock = pygame.time.Clock()
@@ -32,8 +34,8 @@ while andamento:
     desenho_fundo()
 
 # movimentação
-    personagem_1.move()
-    personagem_2.move()
+    personagem_1.move(tela_largura, tela_altura, screen, personagem_2)
+    personagem_2.move(tela_largura, tela_altura, screen, personagem_1)
 
 # desenho dos personagens
     personagem_1.desenho(screen)
