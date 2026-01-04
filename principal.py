@@ -8,17 +8,52 @@ tela_largura = 1000
 tela_altura = 563
 screen = pygame.display.set_mode((tela_largura, tela_altura))
 
+# cores
+ciano = (0, 200, 200)
+branco = (255, 255, 255)
+preto = (0, 0, 0)
+
+# Fonte
+fonte = pygame.font.SysFont(None, 40)
+
+# Estados
+menu = 0
+jogo = 1
+estado = menu
+
+# Botões
+botao_jogar = pygame.Rect(400, 220, 200, 60)
+botao_sair = pygame.Rect(400, 300, 200, 60)
+
+# tela de menu
+def tela_menu():
+    screen.fill(ciano)
+
+    pygame.draw.rect(screen, branco, botao_jogar)
+    pygame.draw.rect(screen, branco, botao_sair)
+
+    texto_jogar = fonte.render("JOGAR", True, preto)
+    texto_sair = fonte.render("SAIR", True, preto)
+
+    screen.blit(texto_jogar, texto_jogar.get_rect(center=botao_jogar.center))
+    screen.blit(texto_sair, texto_sair.get_rect(center=botao_sair.center))
+
+
+# NÃO TIRAR OS COMENTÁRIOS ABAIXO, SERVEM PARA FUTURAS TELAS DE FUNDO***************************
+# fundo_menu = pygame.image.load("menu.png").convert()
+# fundo_menu = pygame.transform.scale(fundo_menu, (tela_largura, tela_altura))
+
+# Plano de Andamento
+def tela_de_andamento():
+    plano_andamento = pygame.image.load("Andamento.png").convert()
+    screen.blit(plano_andamento, (0, 0))
+
 #definir taxa de quadros
 clock = pygame.time.Clock()
 fps = 60
 
 # Nome do Jogo
 pygame.display.set_caption('Pixel Fight')
-
-# Plano de Andamento
-def desenho_fundo():
-    plano_andamento = pygame.image.load("Andamento.png")
-    screen.blit(plano_andamento, (0, 0))
 
 # criador de duas instâncias dos personagens
 personagem_1 = Personagens(200, 260)
@@ -28,29 +63,36 @@ personagem_2 = Personagens(700, 260)
 andamento = True
 while andamento:
 
+# tempo de quadros
     clock.tick(fps)
-
-# desenho do fundo de andamento
-    desenho_fundo()
-
-# movimentação
-    personagem_1.move(tela_largura, tela_altura, screen, personagem_2)
-    personagem_2.move(tela_largura, tela_altura, screen, personagem_1)
-
-# desenho dos personagens
-    personagem_1.desenho(screen)
-    personagem_2.desenho(screen)
-
 
 # fechamento
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
             andamento = False
 
+        if estado == menu and evento.type == pygame.MOUSEBUTTONDOWN:
+            if botao_jogar.collidepoint(evento.pos):
+                estado = jogo
+            if botao_sair.collidepoint(evento.pos):
+                andamento = False
+
+# chamando tela menu
+    if estado == menu:
+        tela_menu()
+# chamando tela de andamento
+    elif estado == jogo:
+        tela_de_andamento()
+
+# movimentação (da tela de andamento)
+        personagem_1.move(tela_largura, tela_altura, screen, personagem_2)
+        personagem_2.move(tela_largura, tela_altura, screen, personagem_1)
+
+# desenho dos personagens (da tela de andamento)
+        personagem_1.desenho(screen)
+        personagem_2.desenho(screen)
+
 # atualizão do display
     pygame.display.update()
-
-# Desenvolvimento 1
-
 
 pygame.quit()
