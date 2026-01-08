@@ -12,6 +12,8 @@ screen = pygame.display.set_mode((tela_largura, tela_altura))
 ciano = (0, 200, 200)
 branco = (255, 255, 255)
 preto = (0, 0, 0)
+amarelo = (255, 255, 0)
+vermelho = (255, 0, 0)
 
 # Fonte
 fonte = pygame.font.SysFont(None, 40)
@@ -48,7 +50,14 @@ def tela_de_andamento():
     plano_andamento = pygame.image.load("Andamento.png").convert()
     screen.blit(plano_andamento, (0, 0))
 
-#definir taxa de quadros
+# Desenhar barras de vida
+def desenhar_barra_vida(vida, x, y):
+    proporcao = vida / 100
+    pygame.draw.rect(screen, branco, (x - 2, y - 2, 404, 34))
+    pygame.draw.rect(screen, vermelho, (x, y, 400, 30))
+    pygame.draw.rect(screen, amarelo, (x, y, 400 * proporcao, 30))
+
+# definir taxa de quadros
 clock = pygame.time.Clock()
 fps = 60
 
@@ -83,6 +92,8 @@ while andamento:
 # chamando tela de andamento
     elif estado == jogo:
         tela_de_andamento()
+        desenhar_barra_vida(personagem_1.vida, 20, 20)
+        desenhar_barra_vida(personagem_2.vida, 580, 20)
 
 # movimentação (da tela de andamento)
         personagem_1.move(tela_largura, tela_altura, screen, personagem_2)

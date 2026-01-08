@@ -2,11 +2,13 @@ import pygame
 
 class Personagens():
     def __init__(self, x, y):
+        self.virar = False
         self.rect = pygame.Rect((x, y, 80, 180))
         self.vel_y = 0
         self.pulo = False
         self.atacando = False
         self.tipo_de_ataque = 0
+        self.vida = 100
 
     def move(self, tela_largura, tela_altura, superface, alvo):
         velocidade = 10
@@ -30,6 +32,7 @@ class Personagens():
     #ataques
             if key[pygame.K_r] or key[pygame.K_t]:
                 self.ataque(superface, alvo)
+
                 #determinar o tipo de ataque que será usado
                 if key[pygame.K_r]:
                     self.tipo_de_ataque = 1
@@ -49,15 +52,21 @@ class Personagens():
             self.pulo = False
             dy = (tela_altura - 110) - self.rect.bottom
 
+# garantir que o jogador ataque na direção que o alvo se encontra
+        if alvo.rect.centerx > self.rect.centerx:
+            self.virar = False
+        if alvo.rect.centerx < self.rect.centerx:
+            self.virar = True
+
 # uptade da posição do player
         self.rect.x += dx
         self.rect.y += dy
 
-    def ataque(self, superface, alvo):
+    def ataque(self, superface, alvo,):
         self.atacando = True
-        retangulo_de_ataque = pygame.Rect(self.rect.centerx, self.rect.y, 2*self.rect.width, self.rect.height)
+        retangulo_de_ataque = pygame.Rect(self.rect.centerx - (2 * self.rect.width), self.rect.y, 2*self.rect.width, self.rect.height)
         if retangulo_de_ataque.colliderect(alvo.rect):
-            print("hit")
+            alvo.vida -= 10
 
         pygame.draw.rect(superface, (0, 255, 0), retangulo_de_ataque)
 
