@@ -47,7 +47,7 @@ def tela_menu():
 
 # Plano de Andamento
 def tela_de_andamento():
-    plano_andamento = pygame.image.load("Andamento.png").convert()
+    plano_andamento = pygame.image.load("plano_de_andamento.png").convert()
     screen.blit(plano_andamento, (0, 0))
 
 # Desenhar barras de vida

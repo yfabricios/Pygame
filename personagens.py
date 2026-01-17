@@ -47,10 +47,10 @@ class Personagens():
             dx = -self.rect.left
         if self.rect.right + dx > tela_largura:
             dx = tela_largura - self.rect.right
-        if self.rect.bottom + dy > (tela_altura - 110):
+        if self.rect.bottom + dy > (tela_altura - 160):
             self.vel_y = 0
             self.pulo = False
-            dy = (tela_altura - 110) - self.rect.bottom
+            dy = (tela_altura - 160) - self.rect.bottom
 
 # garantir que o jogador ataque na direção que o alvo se encontra
         if alvo.rect.centerx > self.rect.centerx:
