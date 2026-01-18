@@ -15,6 +15,16 @@ preto = (0, 0, 0)
 amarelo = (255, 255, 0)
 vermelho = (255, 0, 0)
 
+#definir variaveis dos personagens
+plazer1_largura = 80
+plazer1_escala = 4
+plazer1_offset = [72, 56]
+plazer1_data = [plazer1_largura, plazer1_escala, plazer1_offset]
+reihard2_largura = 80
+reihard2_escala = 4
+reihard2_offset = [112, 107]
+reihard2_data = [reihard2_largura, reihard2_escala, reihard2_offset]
+
 # Fonte
 fonte = pygame.font.SysFont(None, 40)
 
@@ -49,6 +59,16 @@ def tela_menu():
 def tela_de_andamento():
     plano_andamento = pygame.image.load("plano_de_andamento.png").convert()
     screen.blit(plano_andamento, (0, 0))
+    desenhar_barra_vida(personagem_1.vida, 20, 20)
+    desenhar_barra_vida(personagem_2.vida, 580, 20)
+
+#spritesheets
+plazer1_sheets = pygame.image.load("Plazer1.png").convert()
+reihard2_sheets = pygame.image.load("Reihard2.png").convert()
+
+#definir numero de passos de cada animação
+plazer1_anima_passos = [4, 5, 6, 3, 6, 3, 3, 4, 5, 3]
+reihard2_anima_passos = [6, 3, 6, 4, 3, 3, 5, 4, 3, 6]
 
 # Desenhar barras de vida
 def desenhar_barra_vida(vida, x, y):
@@ -65,8 +85,8 @@ fps = 60
 pygame.display.set_caption('Pixel Fight')
 
 # criador de duas instâncias dos personagens
-personagem_1 = Personagens(200, 260)
-personagem_2 = Personagens(700, 260)
+personagem_1 = Personagens(200, 260, False, plazer1_data, plazer1_sheets, plazer1_anima_passos)
+personagem_2 = Personagens(700, 260, True, reihard2_data, reihard2_sheets, reihard2_anima_passos)
 
 # game loop
 andamento = True
@@ -89,12 +109,11 @@ while andamento:
 # chamando tela menu
     if estado == menu:
         tela_menu()
+
 # chamando tela de andamento
     elif estado == jogo:
         tela_de_andamento()
-        desenhar_barra_vida(personagem_1.vida, 20, 20)
-        desenhar_barra_vida(personagem_2.vida, 580, 20)
-
+        
 # movimentação (da tela de andamento)
         personagem_1.move(tela_largura, tela_altura, screen, personagem_2)
         personagem_2.move(tela_largura, tela_altura, screen, personagem_1)
