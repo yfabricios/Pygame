@@ -67,8 +67,8 @@ plazer1_sheets = pygame.image.load("Plazer1.png").convert_alpha()
 reihard2_sheets = pygame.image.load("Reihard2.png").convert_alpha()
 
 #definir numero de passos de cada animação
-plazer1_anima_passos = [4, 5, 6, 3, 6, 3, 3, 4, 5, 3]
-reihard2_anima_passos = [6, 3, 6, 4, 3, 3, 5, 4, 3, 6]
+plazer1_anima_passos = [4, 1, 6, 5, 3, 3]
+reihard2_anima_passos = [4, 3, 3, 5, 1, 6]
 
 # Desenhar barras de vida
 def desenhar_barra_vida(vida, x, y):
@@ -85,8 +85,8 @@ fps = 60
 pygame.display.set_caption('Pixel Fight')
 
 # criador de duas instâncias dos personagens
-personagem_1 = Personagens(200, 260, False, plazer1_data, plazer1_sheets, plazer1_anima_passos)
-personagem_2 = Personagens(700, 260, True, reihard2_data, reihard2_sheets, reihard2_anima_passos)
+personagem_1 = Personagens(200, 400, False, plazer1_data, plazer1_sheets, plazer1_anima_passos)
+personagem_2 = Personagens(700, 400, True, reihard2_data, reihard2_sheets, reihard2_anima_passos)
 
 # game loop
 andamento = True
