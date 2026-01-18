@@ -118,6 +118,11 @@ while andamento:
         personagem_1.move(tela_largura, tela_altura, screen, personagem_2)
         personagem_2.move(tela_largura, tela_altura, screen, personagem_1)
 
+#atualizar personagens
+        personagem_1.atualizar()
+        personagem_2.atualizar()
+
+
 # desenho dos personagens (da tela de andamento)
         personagem_1.desenho(screen)
         personagem_2.desenho(screen)
