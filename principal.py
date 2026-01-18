@@ -63,8 +63,8 @@ def tela_de_andamento():
     desenhar_barra_vida(personagem_2.vida, 580, 20)
 
 #spritesheets
-plazer1_sheets = pygame.image.load("Plazer1.png").convert()
-reihard2_sheets = pygame.image.load("Reihard2.png").convert()
+plazer1_sheets = pygame.image.load("Plazer1.png").convert_alpha()
+reihard2_sheets = pygame.image.load("Reihard2.png").convert_alpha()
 
 #definir numero de passos de cada animação
 plazer1_anima_passos = [4, 5, 6, 3, 6, 3, 3, 4, 5, 3]

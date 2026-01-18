@@ -4,7 +4,7 @@ class Personagens():
     def __init__(self, x, y, virar, data, sprite_sheet, passos_animacao):
         self.tamanho = data[0]
         self.escala_imagem = data[1]
-        self.offset = data[2,]
+        self.offset = data[2]
         self.virar = virar
         self.lista_animacao = self.carregar_imagens(sprite_sheet, passos_animacao)
         self.action = 0 #0: parado, 1:correndo , 2:pulando, 3: soco, 4:chute, 5: acertado, 6: morto
@@ -23,7 +23,7 @@ class Personagens():
         for y, animacao in enumerate(passos_animacao):
             lista_img_temp = []
             for x in range(animacao):
-                img_temp = sprite_sheet.subsurface(x*80, y*180, 80, 180)
+                img_temp = sprite_sheet.subsurface(x, y, 80, 180)
                 lista_img_temp.append(pygame.transform.scale(img_temp, (self.tamanho * self.escala_imagem, self.tamanho * self.escala_imagem)))
             lista_animacao.append(lista_img_temp)
         return lista_animacao
@@ -89,6 +89,6 @@ class Personagens():
         pygame.draw.rect(superface, (0, 255, 0), retangulo_de_ataque)
 
     def desenho(self, superface):
-        img = pygame.transform.flip(self.iamgem, self.flip, False)
+        img = pygame.transform.flip(self.imagem, self.virar, False)
         pygame.draw.rect(superface, (255, 0, 0), self.rect)
         superface.blit(self.imagem, (self.rect.x - (self.offset[0] * self.escala_imagem), self.rect.y - (self.offset[1] * self.escala_imagem)))
