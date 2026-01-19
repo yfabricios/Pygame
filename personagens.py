@@ -18,7 +18,9 @@ class Personagens():
         self.atacando = False
         self.tipo_de_ataque = 0
         self.ataque_cooldown = 0
+        self.golpeado = False
         self.vida = 100
+        self.vivo = True
 
     def carregar_imagens(self, sprite_sheet, passos_animacao):
         #extrair imagens do spritesheet
@@ -93,7 +95,13 @@ class Personagens():
 #atualizar as animações
     def atualizar(self):
         #checar qual a ação que o player está fazendo
-        if self.atacando == True:
+        if self.vida <= 0:
+            self.vida = 0
+            self.vivo = False
+            self.update_action(6)
+        elif self.golpeado == True:
+            self.update_action(5)
+        elif self.atacando == True:
             if self.tipo_de_ataque == 1:
                 self.update_action(3)
             elif self.tipo_de_ataque == 2:
@@ -104,7 +112,7 @@ class Personagens():
             self.update_action(1)
         else:
             self.update_action(0)
-        cooldown_animacao = 500
+        cooldown_animacao = 5
         #atualizar imagem
         self.imagem = self.lista_animacao[self.action][self.frame_index]
         #checar se passou tempo suficiente desde a ultima atualização
@@ -113,11 +121,21 @@ class Personagens():
             self.update_time = pygame.time.get_ticks()
         #checar se a animação foi finalizada
         if self.frame_index >= len(self.lista_animacao[self.action]):
-            self.frame_index = 0
-        #checar se um ataque foi executado
-        if self.action == 3 or self.action == 4:
-            self.atacando = False
-            self.ataque_cooldown = 50
+            #se o player esta morto a animação para
+            if self.vivo == False:
+                self.frame_index = len(self.lista_animacao[self.action]) - 1
+            else:
+                self.frame_index = 0
+                #checar se um ataque foi executado
+                if self.action == 3 or self.action == 4:
+                    self.atacando = False
+                    self.ataque_cooldown = 20
+                #checar se o dano foi recebido
+                if self.action == 5:
+                    self.golpeado = False
+                    #se o jogador estiver no meio do ataque, o ataque será parado
+                    self.atacando = False
+                    self.ataque_cooldown = 20
 
     def ataque(self, superface, alvo,):
         if self.ataque_cooldown == 0:
@@ -125,6 +143,7 @@ class Personagens():
             retangulo_de_ataque = pygame.Rect(self.rect.centerx - (2 * self.rect.width), self.rect.y, 2*self.rect.width, self.rect.height)
             if retangulo_de_ataque.colliderect(alvo.rect):
                 alvo.vida -= 10
+                alvo.golpeado = True
             pygame.draw.rect(superface, (0, 255, 0), retangulo_de_ataque)
 
     def update_action(self, new_action):
