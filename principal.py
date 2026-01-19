@@ -15,6 +15,10 @@ preto = (0, 0, 0)
 amarelo = (255, 255, 0)
 vermelho = (255, 0, 0)
 
+# definação das variaveis do jogo
+intro_contador = 3
+last_contador_uptade = pygame.time.get_ticks()
+
 #definir variaveis dos personagens
 plazer1_largura = 80
 plazer1_escala = 4
@@ -26,7 +30,14 @@ reihard2_offset = [112, 107]
 reihard2_data = [reihard2_largura, reihard2_escala, reihard2_offset]
 
 # Fonte
+contador_fonte = pygame.font.Font("None", 80)
+pontuacao_font = pygame.font.Font("None", 30)
 fonte = pygame.font.SysFont(None, 40)
+
+#função para desenhar o texto
+def desenho_texto(texto, fonte, texto_cor, x, y):
+    img = fonte.render(texto, True, texto_cor)
+    screen.blit(img, (x, y))
 
 # Estados
 menu = 0
@@ -85,8 +96,8 @@ fps = 60
 pygame.display.set_caption('Pixel Fight')
 
 # criador de duas instâncias dos personagens
-personagem_1 = Personagens(200, 400, False, plazer1_data, plazer1_sheets, plazer1_anima_passos)
-personagem_2 = Personagens(700, 400, True, reihard2_data, reihard2_sheets, reihard2_anima_passos)
+personagem_1 = Personagens(1, 200, 223, False, plazer1_data, plazer1_sheets, plazer1_anima_passos)
+personagem_2 = Personagens(2, 700, 223, True, reihard2_data, reihard2_sheets, reihard2_anima_passos)
 
 # game loop
 andamento = True
@@ -113,11 +124,20 @@ while andamento:
 # chamando tela de andamento
     elif estado == jogo:
         tela_de_andamento()
-        
-# movimentação (da tela de andamento)
-        personagem_1.move(tela_largura, tela_altura, screen, personagem_2)
-        personagem_2.move(tela_largura, tela_altura, screen, personagem_1)
 
+# atualização da contagem regressiva
+        if intro_contador <= 0:
+    # movimentação (da tela de andamento)
+            personagem_1.move(tela_largura, tela_altura, screen, personagem_2)
+            personagem_2.move(tela_largura, tela_altura, screen, personagem_1)
+        else:
+    # atualizador do cronometro
+            desenho_texto(str(intro_contador), contador_fonte, vermelho, tela_largura / 2, tela_altura / 3)
+    # contador do cronometro
+            if (pygame.time.get_ticks() - last_contador_uptade) >= 1000:
+                intro_contador -= 1
+                last_contador_uptade = pygame.time.get_ticks()
+        
 #atualizar personagens
         personagem_1.atualizar()
         personagem_2.atualizar()

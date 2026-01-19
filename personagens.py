@@ -1,7 +1,8 @@
 import pygame
 
 class Personagens():
-    def __init__(self, x, y, virar, data, sprite_sheet, passos_animacao):
+    def __init__(self, jogador, x, y, virar, data, sprite_sheet, passos_animacao):
+        self.jogador = jogador
         self.tamanho = data[0]
         self.escala_imagem = data[1]
         self.offset = data[2]
@@ -34,7 +35,7 @@ class Personagens():
         return lista_animacao
 
     def move(self, tela_largura, tela_altura, superface, alvo):
-        velocidade = 10
+        velocidade = 8
         gravidade = 2
         dx = 0
         dy = 0
@@ -43,28 +44,55 @@ class Personagens():
 
 # Precionamento das teclas
         key = pygame.key.get_pressed()
-#só pode fazer outras ações se não estiver atacando
-        if self.atacando == False:
-    # Movimento
-            if key[pygame.K_a]:
-                dx = -velocidade
-                self.corrrendo = True
-            if key[pygame.K_d]:
-                dx = velocidade
-                self.corrrendo = True
-    #pulo   
-            if key[pygame.K_w] and self.pulo == False:
-                self.vel_y = -30
-                self.pulo = True
-    #ataques
-            if key[pygame.K_r] or key[pygame.K_t]:
-                self.ataque(superface, alvo)
 
-                #determinar o tipo de ataque que será usado
-                if key[pygame.K_r]:
-                    self.tipo_de_ataque = 1
-                if key[pygame.K_t]:
-                    self.tipo_de_ataque = 2
+#só pode fazer outras ações se não estiver atacando
+        if self.atacando == False and self.vivo == True:
+
+    #checando os controles do jogador 1
+            if self.jogador == 1:
+
+    # Movimento
+                if key[pygame.K_a]:
+                    dx = -velocidade
+                    self.corrrendo = True
+                if key[pygame.K_d]:
+                    dx = velocidade
+                    self.corrrendo = True
+        #pulo   
+                if key[pygame.K_w] and self.pulo == False:
+                    self.vel_y = -30
+                    self.pulo = True
+        #ataques
+                if key[pygame.K_r] or key[pygame.K_t]:
+                    self.ataque(superface, alvo)
+
+                    #determinar o tipo de ataque que será usado
+                    if key[pygame.K_r]:
+                        self.tipo_de_ataque = 1
+                    if key[pygame.K_t]:
+                        self.tipo_de_ataque = 2
+#checando os controles do jogador 2
+            if self.jogador == 2 and self.vivo == True:
+    # Movimento
+                if key[pygame.K_LEFT]:
+                    dx = -velocidade
+                    self.corrrendo = True
+                if key[pygame.K_RIGHT]:
+                    dx = velocidade
+                    self.corrrendo = True
+        #pulo   
+                if key[pygame.K_UP] and self.pulo == False:
+                    self.vel_y = -30
+                    self.pulo = True
+        #ataques
+                if key[pygame.K_o] or key[pygame.K_p]:
+                    self.ataque(superface, alvo)
+
+                    #determinar o tipo de ataque que será usado
+                    if key[pygame.K_o]:
+                        self.tipo_de_ataque = 1
+                    if key[pygame.K_p]:
+                        self.tipo_de_ataque = 2
 #aplicar gravidade
         self.vel_y += gravidade
         dy += self.vel_y
