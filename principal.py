@@ -5,7 +5,7 @@ pygame.init()
 
 # Criação da Janela
 tela_largura = 1000
-tela_altura = 563
+tela_altura = 600
 screen = pygame.display.set_mode((tela_largura, tela_altura))
 
 # cores
@@ -15,26 +15,22 @@ preto = (0, 0, 0)
 amarelo = (255, 255, 0)
 vermelho = (255, 0, 0)
 
-# definação das variaveis do jogo
-intro_contador = 3
-last_contador_uptade = pygame.time.get_ticks()
+# carregando vitoria imagem
+vitoria_img = pygame.image.load("Vitoria.png").convert_alpha
 
-#definir variaveis dos personagens
-plazer1_largura = 80
-plazer1_escala = 4
-plazer1_offset = [72, 56]
-plazer1_data = [plazer1_largura, plazer1_escala, plazer1_offset]
-reihard2_largura = 80
-reihard2_escala = 4
-reihard2_offset = [112, 107]
-reihard2_data = [reihard2_largura, reihard2_escala, reihard2_offset]
+# definir as variaveis do jogo
+intro_contador = 5
+last_contador_uptade = pygame.time.get_ticks()
+pontuacao = [0, 0] # [p1, p2]
+round_fim = False
+round_contador = 2000
 
 # Fonte
-contador_fonte = pygame.font.Font("None", 80)
-pontuacao_font = pygame.font.Font("None", 30)
+contador_fonte = pygame.font.Font("Minecraft.ttf", 80)
+pontuacao_fonte = pygame.font.Font("Minecraft.ttf", 30)
 fonte = pygame.font.SysFont(None, 40)
 
-#função para desenhar o texto
+# função para desenhar o texto
 def desenho_texto(texto, fonte, texto_cor, x, y):
     img = fonte.render(texto, True, texto_cor)
     screen.blit(img, (x, y))
@@ -70,16 +66,6 @@ def tela_menu():
 def tela_de_andamento():
     plano_andamento = pygame.image.load("plano_de_andamento.png").convert()
     screen.blit(plano_andamento, (0, 0))
-    desenhar_barra_vida(personagem_1.vida, 20, 20)
-    desenhar_barra_vida(personagem_2.vida, 580, 20)
-
-#spritesheets
-plazer1_sheets = pygame.image.load("Plazer1.png").convert_alpha()
-reihard2_sheets = pygame.image.load("Reihard2.png").convert_alpha()
-
-#definir numero de passos de cada animação
-plazer1_anima_passos = [4, 1, 6, 5, 3, 3]
-reihard2_anima_passos = [4, 3, 3, 5, 1, 6]
 
 # Desenhar barras de vida
 def desenhar_barra_vida(vida, x, y):
@@ -96,8 +82,8 @@ fps = 60
 pygame.display.set_caption('Pixel Fight')
 
 # criador de duas instâncias dos personagens
-personagem_1 = Personagens(1, 200, 223, False, plazer1_data, plazer1_sheets, plazer1_anima_passos)
-personagem_2 = Personagens(2, 700, 223, True, reihard2_data, reihard2_sheets, reihard2_anima_passos)
+personagem_1 = Personagens(1, 200, 215)
+personagem_2 = Personagens(2, 700, 215)
 
 # game loop
 andamento = True
@@ -120,33 +106,51 @@ while andamento:
 # chamando tela menu
     if estado == menu:
         tela_menu()
-
 # chamando tela de andamento
     elif estado == jogo:
         tela_de_andamento()
 
-# atualização da contagem regressiva
+# desenho da barra de vida
+        desenhar_barra_vida(personagem_1.vida, 20, 20)
+        desenhar_barra_vida(personagem_2.vida, 580, 20)
+        desenho_texto("P1: " + str(pontuacao[0]), pontuacao_fonte, amarelo, 20, 60)
+        desenho_texto("R2: " + str(pontuacao[1]), pontuacao_fonte, amarelo, 580, 60)
+
+# atualização do cronometro
         if intro_contador <= 0:
     # movimentação (da tela de andamento)
-            personagem_1.move(tela_largura, tela_altura, screen, personagem_2)
-            personagem_2.move(tela_largura, tela_altura, screen, personagem_1)
+            personagem_1.move(tela_largura, tela_altura, screen, personagem_2, round_fim)
+            personagem_2.move(tela_largura, tela_altura, screen, personagem_1, round_fim)
         else:
-    # atualizador do cronometro
-            desenho_texto(str(intro_contador), contador_fonte, vermelho, tela_largura / 2, tela_altura / 3)
-    # contador do cronometro
+    # atualizador do contador do cronometro
+            desenho_texto(str(intro_contador), contador_fonte, vermelho, tela_largura / 2, tela_altura / 5)
+    # atualização do contador do cronometro
             if (pygame.time.get_ticks() - last_contador_uptade) >= 1000:
                 intro_contador -= 1
                 last_contador_uptade = pygame.time.get_ticks()
-        
-#atualizar personagens
-        personagem_1.atualizar()
-        personagem_2.atualizar()
-
 
 # desenho dos personagens (da tela de andamento)
         personagem_1.desenho(screen)
         personagem_2.desenho(screen)
 
+# checar quando o player for derrotado
+        if round_fim == False:
+            if personagem_1.vivo == False:
+                pontuacao[1] += 1
+                round_fim = True
+                round_fim_tempo = pygame.time.get_ticks()
+            elif personagem_2.vivo == False:
+                pontuacao[0] += 1
+                round_fim = True
+                round_fim_tempo = pygame.time.get_ticks()
+        else:
+    # exibição da imagem da vitoria
+            screen.blit(vitoria_img, (360, 150))
+            if pygame.time.get_ticks() - round_fim_tempo > round_contador:
+                round_fim = False
+                intro_contador = 3
+                personagem_1 = Personagens(1, 200, 215)
+                personagem_2 = Personagens(2, 700, 215)
 # atualizão do display
     pygame.display.update()
 
