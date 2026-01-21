@@ -9,14 +9,27 @@ class Personagens():
         self.pulo = False
         self.atacando = False
         self.tipo_de_ataque = 0
-        self.vida = 10
+        self.tempo_ataque = 0
+        self.vida = 100
         self.vivo = True
+        self.tempo_ataque = 0
+        self.cooldown_ataque = 0
 
     def move(self, tela_largura, tela_altura, superface, alvo, round_fim):
         velocidade = 10
         gravidade = 2
         dx = 0
         dy = 0
+
+# tempo da trava de ataque
+        if self.tempo_ataque > 0:
+            self.tempo_ataque -= 1
+        else:
+            self.atacando = False
+
+#cooldown
+        if self.cooldown_ataque > 0:
+            self.cooldown_ataque -= 1
 
 # Precionamento das teclas
         key = pygame.key.get_pressed()
@@ -33,17 +46,17 @@ class Personagens():
                     dx = velocidade
             #pulo
                 if key[pygame.K_w] and self.pulo == False:
-                    self.vel_y = -30
+                    self.vel_y = -25
                     self.pulo = True
             #ataques
-                if key[pygame.K_r] or key[pygame.K_t]:
+                if (key[pygame.K_r] or key[pygame.K_t]) and self.cooldown_ataque == 0:
                     self.ataque(superface, alvo)
-
                 #determinar o tipo de ataque que será usado
                     if key[pygame.K_r]:
                         self.tipo_de_ataque = 1
                     if key[pygame.K_t]:
                         self.tipo_de_ataque = 2
+                        
 
     # checar controles do jogador 2
             if self.jogador == 2:
@@ -55,10 +68,10 @@ class Personagens():
                     dx = velocidade
         #pulo
                 if key[pygame.K_UP] and self.pulo == False:
-                    self.vel_y = -30
+                    self.vel_y = -25
                     self.pulo = True
         #ataques
-                if key[pygame.K_o] or key[pygame.K_p]:
+                if (key[pygame.K_o] or key[pygame.K_p]) and self.cooldown_ataque == 0:
                     self.ataque(superface, alvo)
 
                     #determinar o tipo de ataque que será usado
@@ -92,6 +105,9 @@ class Personagens():
 
     def ataque(self, superface, alvo,):
         self.atacando = True
+        self.tempo_ataque = 15
+        self.cooldown_ataque = 30
+
         retangulo_de_ataque = pygame.Rect(self.rect.centerx - (2 * self.rect.width * self.virar), self.rect.y, 2*self.rect.width, self.rect.height)
         if retangulo_de_ataque.colliderect(alvo.rect):
             alvo.vida -= 10
@@ -100,3 +116,4 @@ class Personagens():
 
     def desenho(self, superface):
         pygame.draw.rect(superface, (255, 0, 0), self.rect)
+         

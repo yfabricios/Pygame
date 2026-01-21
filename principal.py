@@ -16,7 +16,7 @@ amarelo = (255, 255, 0)
 vermelho = (255, 0, 0)
 
 # carregando vitoria imagem
-vitoria_img = pygame.image.load("Vitoria.png").convert_alpha
+vitoria_img = pygame.image.load("Vitoria.png").convert_alpha()
 
 # definir as variaveis do jogo
 intro_contador = 5
@@ -135,11 +135,13 @@ while andamento:
 
 # checar quando o player for derrotado
         if round_fim == False:
-            if personagem_1.vivo == False:
+            if personagem_1.vida <= 0:
+                personagem_1.vivo == False
                 pontuacao[1] += 1
                 round_fim = True
                 round_fim_tempo = pygame.time.get_ticks()
-            elif personagem_2.vivo == False:
+            elif personagem_2.vida <= 0:
+                personagem_2.vivo == False
                 pontuacao[0] += 1
                 round_fim = True
                 round_fim_tempo = pygame.time.get_ticks()
