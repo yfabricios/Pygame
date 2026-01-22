@@ -74,6 +74,119 @@ def desenhar_barra_vida(vida, x, y):
     pygame.draw.rect(screen, vermelho, (x, y, 400, 30))
     pygame.draw.rect(screen, amarelo, (x, y, 400 * proporcao, 30))
 
+#spritesheets
+plazer1_sheets = pygame.image.load("Plazer1.png").convert_alpha()
+reihard2_sheets = pygame.image.load("Reihard2.png").convert_alpha()
+
+#passos de cada animação
+
+#plazer
+plazer_andando = []
+for i in range (0, 4):
+    img = plazer1_sheets.subsurface(i*80, 0), (80, 180)
+    plazer_andando.append(img)
+
+plazer_morre = []
+for i in range (4, 5):
+    img = plazer1_sheets.subsurface(i*80, 0), (80, 180)
+    plazer_morre.append(img)
+
+plazer_pulando = []
+for i in range (5, 11):
+    img = plazer1_sheets.subsurface(i*80, 0), (80, 180)
+    plazer_pulando.append(img)
+
+plazer_chutando = []
+for i in range (0, 5):
+    img = plazer1_sheets.subsurface(i*80, 180), (80, 180)
+    plazer_chutando.append(img)
+
+plazer_socando = []
+for i in range (5, 8):
+    img = plazer1_sheets.subsurface(i*80, 180), (80, 180)
+    plazer_socando.append(img)
+
+plazer_parado = []
+for i in range (0, 3):
+    img = plazer1_sheets.subsurface(i*80, 360), (80, 180)
+    plazer_parado.append(img)
+
+#reihard
+
+reihard_andando = []
+for i in range (0, 4):
+    img = reihard2_sheets.subsurface(i*80, 0), (80, 180)
+    reihard_andando.append(img)
+
+reihard_morre = []
+for i in range (5, 6):
+    img = reihard2_sheets.subsurface(i*80, 180), (80, 180)
+    reihard_morre.append(img)
+
+reihard_pulando = []
+for i in range (0, 6):
+    img = reihard2_sheets.subsurface(i*80, 360) (80, 180)
+    reihard_pulando.append(img)
+
+reihard_chutando = []
+for i in range (0, 5):
+    img = reihard2_sheets.subsurface(i*80, 180), (80, 180)
+    reihard_chutando.append(img)
+
+reihard_socando = []
+for i in range (7, 10):
+    img = reihard2_sheets.subsurface(i*80, 0), (80, 180)
+    reihard_socando.append(img)
+
+reihard_parado = []
+for i in range (4, 7):
+    img = reihard2_sheets.subsurface(i*80, 0), (80, 180)
+    reihard_parado.append(img)
+
+#pacote de animação
+plazer_pacote = [plazer_parado, plazer_andando, plazer_pulando, plazer_socando, plazer_chutando, plazer_morre]
+reihard_pacote = [reihard_parado, reihard_andando, reihard_pulando, reihard_socando, reihard_chutando, reihard_morre]
+pacote_anima = [plazer_parado, plazer_andando, plazer_pulando, plazer_socando, plazer_chutando, plazer_morre, reihard_parado, reihard_andando, reihard_pulando, reihard_socando, reihard_chutando, reihard_morre]
+
+def action(pacote_anima, plazer_action, reihard_action):
+    if plazer_action == 0:
+        for i in range (len(pacote_anima[plazer_action])):
+            img_temp = pacote_anima[plazer_action][i]
+    if plazer_action == 1:
+        for i in range (len(pacote_anima[plazer_action])):
+            img_temp = pacote_anima[plazer_action][i]   
+    if plazer_action == 2:
+        for i in range (len(pacote_anima[plazer_action])):
+            img_temp = pacote_anima[plazer_action][i]
+    if plazer_action == 3:
+        for i in range (len(pacote_anima[plazer_action])):
+            img_temp = pacote_anima[plazer_action][i]
+    if plazer_action == 4:
+        for i in range (len(pacote_anima[plazer_action])):
+            img_temp = pacote_anima[plazer_action][i]
+    if plazer_action == 5:
+        for i in range (len(pacote_anima[plazer_action])):
+            img_temp = pacote_anima[plazer_action][i] 
+    if reihard_action == 6:
+        for i in range (len(pacote_anima[reihard_action])):
+            img_temp = pacote_anima[reihard_action][i]
+    if reihard_action == 7:
+        for i in range (len(pacote_anima[reihard_action])):
+            img_temp = pacote_anima[reihard_action][i]
+    if reihard_action == 8:
+        for i in range (len(pacote_anima[reihard_action])):
+            img_temp = pacote_anima[reihard_action][i]
+    if reihard_action == 9:
+        for i in range (len(pacote_anima[reihard_action])):
+            img_temp = pacote_anima[reihard_action][i]
+    if reihard_action == 10:
+        for i in range (len(pacote_anima[reihard_action])):
+            img_temp = pacote_anima[reihard_action][i]
+    if reihard_action == 11:
+        for i in range (len(pacote_anima[reihard_action])):
+            img_temp = pacote_anima[reihard_action][i]
+
+
 # definir taxa de quadros
 clock = pygame.time.Clock()
 fps = 60

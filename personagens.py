@@ -14,6 +14,8 @@ class Personagens():
         self.vivo = True
         self.tempo_ataque = 0
         self.cooldown_ataque = 0
+        plazer_action = 0
+        reihard_action = 6
 
     def move(self, tela_largura, tela_altura, superface, alvo, round_fim):
         velocidade = 10
@@ -189,3 +191,42 @@ class Personagens():
     #pacote de animação
     plazer_pacote = [plazer_parado, plazer_andando, plazer_pulando, plazer_socando, plazer_chutando, plazer_morre]
     reihard_pacote = [reihard_parado, reihard_andando, reihard_pulando, reihard_socando, reihard_chutando, reihard_morre]
+    pacote_anima = [plazer_parado, plazer_andando, plazer_pulando, plazer_socando, plazer_chutando, plazer_morre, reihard_parado, reihard_andando, reihard_pulando, reihard_socando, reihard_chutando, reihard_morre]
+    
+    def action(pacote_anima, plazer_action, reihard_action):
+        if plazer_action == 0:
+            for i in range (len(pacote_anima[plazer_action])):
+                img_temp = pacote_anima[plazer_action][i]
+        if plazer_action == 1:
+            for i in range (len(pacote_anima[plazer_action])):
+                img_temp = pacote_anima[plazer_action][i]   
+        if plazer_action == 2:
+            for i in range (len(pacote_anima[plazer_action])):
+                img_temp = pacote_anima[plazer_action][i]
+        if plazer_action == 3:
+            for i in range (len(pacote_anima[plazer_action])):
+                img_temp = pacote_anima[plazer_action][i]
+        if plazer_action == 4:
+            for i in range (len(pacote_anima[plazer_action])):
+                img_temp = pacote_anima[plazer_action][i]
+        if plazer_action == 5:
+            for i in range (len(pacote_anima[plazer_action])):
+                img_temp = pacote_anima[plazer_action][i] 
+        if reihard_action == 6:
+            for i in range (len(pacote_anima[reihard_action])):
+                img_temp = pacote_anima[reihard_action][i]
+        if reihard_action == 7:
+            for i in range (len(pacote_anima[reihard_action])):
+                img_temp = pacote_anima[reihard_action][i]
+        if reihard_action == 8:
+            for i in range (len(pacote_anima[reihard_action])):
+                img_temp = pacote_anima[reihard_action][i]
+        if reihard_action == 9:
+            for i in range (len(pacote_anima[reihard_action])):
+                img_temp = pacote_anima[reihard_action][i]
+        if reihard_action == 10:
+            for i in range (len(pacote_anima[reihard_action])):
+                img_temp = pacote_anima[reihard_action][i]
+        if reihard_action == 11:
+            for i in range (len(pacote_anima[reihard_action])):
+                img_temp = pacote_anima[reihard_action][i]
