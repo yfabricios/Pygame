@@ -18,7 +18,7 @@ class Personagens():
         self.pulando = False
         self.atacando = False
         self.vivo = True
-        self.tempo_cooldown = 600
+        self.tempo_cooldown = 800
         self.ultimo_ataque = 0
 
         self.rect = pygame.Rect(x, y, 80, 180)
@@ -145,41 +145,48 @@ class Personagens():
 
     # --------------------------------------------------
 
-    def atacar(self, tipo, alvo):
-        tempo_atual = pygame.time.get_ticks()
+def atacar(self, tipo, alvo):
+    tempo_atual = pygame.time.get_ticks()
 
-        if self.atacando:
-            return
+    if self.atacando:
+        return
 
-        if tempo_atual - self.ultimo_ataque < self.tempo_cooldown:
-            return
+    if tempo_atual - self.ultimo_ataque < self.tempo_cooldown:
+        return
 
-        self.atacando = True
-        self.ultimo_ataque = tempo_atual
-        self.frame_index = 0
-        self.set_action(tipo)
+    self.atacando = True
+    self.ultimo_ataque = tempo_atual
+    self.frame_index = 0
+    self.set_action(tipo)
 
-        # -------- HITBOX CORRETA PARA CADA SPRITE BASE
-        if self.jogador == 1:
-            offset = 40 if not self.flip else -40
-        else:
-            offset = -40 if not self.flip else 40
+    largura_hitbox = 40
+    altura_hitbox = 80
+    y_hitbox = self.rect.y + 40
 
-        hitbox = pygame.Rect(
-            self.rect.centerx + offset,
-            self.rect.y + 40,
-            40,
-            80
-        )
+    alcance = 20  # <<< AJUSTE FINO DO ALCANCE
 
-        if hitbox.colliderect(alvo.rect):
-            alvo.vida -= 10
-            if alvo.vida <= 0:
-                alvo.vivo = False
-                alvo.atacando = False
-                alvo.pulando = False
-                alvo.vel_y = 0
-                alvo.set_action("morte")
+    if not self.flip:
+        # olhando para a direita
+        hitbox_x = self.rect.right - alcance
+    else:
+        # olhando para a esquerda
+        hitbox_x = self.rect.left - largura_hitbox + alcance
+
+    hitbox = pygame.Rect(
+        hitbox_x,
+        y_hitbox,
+        largura_hitbox,
+        altura_hitbox
+    )
+
+    if hitbox.colliderect(alvo.rect):
+        alvo.vida -= 10
+        if alvo.vida <= 0:
+            alvo.vivo = False
+            alvo.atacando = False
+            alvo.pulando = False
+            alvo.vel_y = 0
+            alvo.set_action("morte")
 
     # --------------------------------------------------
 
