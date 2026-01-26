@@ -19,7 +19,7 @@ amarelo = (255, 255, 0)
 vermelho = (255, 0, 0)
 
 # --------------------------------------------------
-# Imagens (carregar UMA vez)
+# Imagens
 vitoria_img = pygame.image.load("Vitoria.png").convert_alpha()
 plano_andamento = pygame.image.load("plano_de_andamento.png").convert()
 
@@ -82,14 +82,16 @@ fps = 60
 
 # --------------------------------------------------
 # Personagens
-personagem_1 = Personagens(1, 200, 215)
-personagem_2 = Personagens(2, 700, 215)
+plazer_sheet = pygame.image.load("Plazer1.png").convert_alpha()
+reihard_sheet = pygame.image.load("Reihard2.png").convert_alpha()
+
+personagem_1 = Personagens(100, 215, 1, plazer_sheet, 100)
+personagem_2 = Personagens(800, 215, 2, reihard_sheet, 100)
 
 # --------------------------------------------------
 # Game loop
 rodando = True
 while rodando:
-
     clock.tick(fps)
 
     for evento in pygame.event.get():
@@ -108,13 +110,12 @@ while rodando:
     elif estado == JOGO:
         tela_de_andamento()
 
-        # UI
         desenhar_barra_vida(personagem_1.vida, 20, 20)
         desenhar_barra_vida(personagem_2.vida, 580, 20)
+
         desenho_texto(f"P1: {pontuacao[0]}", pontuacao_fonte, amarelo, 20, 60)
         desenho_texto(f"P2: {pontuacao[1]}", pontuacao_fonte, amarelo, 580, 60)
 
-        # Cronômetro inicial
         if intro_contador <= 0:
             personagem_1.move(tela_largura, tela_altura, screen, personagem_2, round_fim)
             personagem_2.move(tela_largura, tela_altura, screen, personagem_1, round_fim)
@@ -126,30 +127,46 @@ while rodando:
                 intro_contador -= 1
                 last_contador_uptade = pygame.time.get_ticks()
 
-        # Desenho dos personagens
         personagem_1.desenho(screen)
         personagem_2.desenho(screen)
 
-        # Checar fim do round
+               # ---------------- FIM DO ROUND / PONTUAÇÃO ----------------
         if not round_fim:
-            if personagem_1.vida <= 0:
-                personagem_1.vivo = False
+            if not personagem_1.vivo:
                 pontuacao[1] += 1
                 round_fim = True
                 round_fim_tempo = pygame.time.get_ticks()
 
-            elif personagem_2.vida <= 0:
-                personagem_2.vivo = False
+            elif not personagem_2.vivo:
                 pontuacao[0] += 1
                 round_fim = True
                 round_fim_tempo = pygame.time.get_ticks()
+
         else:
-            screen.blit(vitoria_img, (360, 150))
-            if pygame.time.get_ticks() - round_fim_tempo > round_contador:
+            if pygame.time.get_ticks() - round_fim_tempo >= round_contador:
                 round_fim = False
-                intro_contador = 3
-                personagem_1 = Personagens(1, 200, 215)
-                personagem_2 = Personagens(2, 700, 215)
+                intro_contador = 5
+                last_contador_uptade = pygame.time.get_ticks()
+
+                personagem_1.vida = 100
+                personagem_2.vida = 100
+                personagem_1.vivo = True
+                personagem_2.vivo = True
+
+                # posição correta no chão
+                chao = 395
+                personagem_1.rect.bottom = chao
+                personagem_2.rect.bottom = chao
+
+                personagem_1.rect.x = 100
+                personagem_2.rect.x = 800
+
+                # reset da física
+                personagem_1.vel_y = 0
+                personagem_2.vel_y = 0
+
+                personagem_1.pulando = False
+                personagem_2.pulando = False
 
     pygame.display.update()
 

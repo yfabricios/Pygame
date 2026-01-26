@@ -1,164 +1,217 @@
 import pygame
-import os
 
-class Personagens(pygame.sprite.Sprite):
-    def __init__(self, jogador, x, y):
-        super().__init__()
-
+class Personagens():
+    def __init__(self, x, y, jogador, sprite_sheet, vida):
         self.jogador = jogador
-        self.virar = False
-        self.rect = pygame.Rect(x, y, 80, 180)
+        self.sprite_sheet = sprite_sheet
+        self.vida = vida
 
-        # estado físico
-        self.vel_y = 0
-        self.pulo = False
+        self.frame_largura = 80
+        self.frame_altura = 180
 
-        # combate
-        self.atacando = False
-        self.tipo_de_ataque = 0
-        self.tempo_ataque = 0
-        self.cooldown_ataque = 0
-
-        # vida
-        self.vida = 100
-        self.vivo = True
-
-        # animação
-        self.action = 0
+        self.action = "parado"
         self.frame_index = 0
         self.update_time = pygame.time.get_ticks()
+        self.flip = False
 
-        # carregar animações
-        self.animation_list = self.carregar_animacoes()
+        self.vel_y = 0
+        self.pulando = False
+        self.atacando = False
+        self.vivo = True
+        self.tempo_cooldown = 600
+        self.ultimo_ataque = 0
 
-        self.image = self.animation_list[self.action][self.frame_index]
+        self.rect = pygame.Rect(x, y, 80, 180)
+
+        self.animacoes = self.carregar_animacoes()
+        self.image = self.animacoes[self.action][self.frame_index]
 
     # --------------------------------------------------
-    
+
     def carregar_animacoes(self):
-        animation_list = []
+        anim = {}
 
-        base_path = os.path.dirname(__file__)
-        sheet_path = os.path.join(base_path, "Plazer1.png")
-
-        if not os.path.exists(sheet_path):
-            raise FileNotFoundError(f"Sprite não encontrada em: {sheet_path}")
-
-        sheet = pygame.image.load(sheet_path).convert_alpha()
-
-        SPRITE_LARGURA = 80
-        SPRITE_ALTURA = 180
-
-        animacoes = [4, 4, 6, 5, 5, 1]
-
-        for linha, frames in enumerate(animacoes):
-            temp_list = []
-            for coluna in range(frames):
-                frame = sheet.subsurface(
-                    coluna * SPRITE_LARGURA,
-                    linha * SPRITE_ALTURA,
-                    SPRITE_LARGURA,
-                    SPRITE_ALTURA
+        def pegar_frames(linha, inicio, fim):
+            frames = []
+            for i in range(inicio, fim + 1):
+                frame = self.sprite_sheet.subsurface(
+                    i * self.frame_largura,
+                    linha * self.frame_altura,
+                    self.frame_largura,
+                    self.frame_altura
                 )
-                temp_list.append(frame)
-            animation_list.append(temp_list)
+                frames.append(frame)
+            return frames
 
-        return animation_list
+        if self.jogador == 1:
+            anim["parado"]  = pegar_frames(2, 0, 2)
+            anim["andando"] = pegar_frames(0, 0, 3)
+            anim["pulando"] = pegar_frames(0, 5, 10)
+            anim["soco"]    = pegar_frames(1, 5, 7)
+            anim["chute"]   = pegar_frames(1, 0, 4)
+            anim["morte"]   = pegar_frames(0, 4, 4)
+        else:
+            anim["parado"]  = pegar_frames(0, 4, 6)
+            anim["andando"] = pegar_frames(0, 0, 3)
+            anim["pulando"] = pegar_frames(2, 0, 5)
+            anim["soco"]    = pegar_frames(0, 7, 9)
+            anim["chute"]   = pegar_frames(1, 0, 4)
+            anim["morte"]   = pegar_frames(1, 5, 5)
 
-    # --------------------------------------------------
-    def update_animation(self):
-        ANIMATION_COOLDOWN = 100
-
-        if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
-            self.update_time = pygame.time.get_ticks()
-            self.frame_index += 1
-
-            if self.frame_index >= len(self.animation_list[self.action]):
-                if self.action == 5:
-                    self.frame_index = len(self.animation_list[self.action]) - 1
-                else:
-                    self.action = 0
-                    self.frame_index = 0
-
-        self.image = self.animation_list[self.action][self.frame_index]
+        return anim
 
     # --------------------------------------------------
-    def move(self, tela_largura, tela_altura, superficie, alvo, round_fim):
-        velocidade = 10
-        gravidade = 2
-        dx = dy = 0
 
-        key = pygame.key.get_pressed()
+    def move(self, largura, altura, screen, alvo, round_fim):
+        if round_fim:
+            self.vel_y = 0
+            self.pulando = False
+            self.rect.bottom = 395
+            return
 
-        if self.vivo and not round_fim and not self.atacando:
+        if not self.vivo:
+            return
 
+        velocidade = 6
+        dx = 0
+        dy = 0
+
+        teclas = pygame.key.get_pressed()
+        movendo = False
+
+        if not self.atacando:
             if self.jogador == 1:
-                if key[pygame.K_a]:
+                if teclas[pygame.K_a]:
                     dx = -velocidade
-                    self.action = 1
-                if key[pygame.K_d]:
+                    movendo = True
+                elif teclas[pygame.K_d]:
                     dx = velocidade
-                    self.action = 1
-                if key[pygame.K_w] and not self.pulo:
-                    self.vel_y = -25
-                    self.pulo = True
-                    self.action = 2
-                if key[pygame.K_r] and self.cooldown_ataque == 0:
-                    self.atacar(superficie, alvo, 3)
-                if key[pygame.K_t] and self.cooldown_ataque == 0:
-                    self.atacar(superficie, alvo, 4)
+                    movendo = True
 
-            if self.jogador == 2:
-                if key[pygame.K_LEFT]:
+                if teclas[pygame.K_w] and not self.pulando:
+                    self.vel_y = -18
+                    self.pulando = True
+                    self.set_action("pulando")
+
+                if teclas[pygame.K_r]:
+                    self.atacar("soco", alvo)
+                elif teclas[pygame.K_t]:
+                    self.atacar("chute", alvo)
+
+            else:
+                if teclas[pygame.K_LEFT]:
                     dx = -velocidade
-                    self.action = 1
-                if key[pygame.K_RIGHT]:
+                    movendo = True
+                elif teclas[pygame.K_RIGHT]:
                     dx = velocidade
-                    self.action = 1
-                if key[pygame.K_UP] and not self.pulo:
-                    self.vel_y = -25
-                    self.pulo = True
-                    self.action = 2
-                if key[pygame.K_o] and self.cooldown_ataque == 0:
-                    self.atacar(superficie, alvo, 3)
-                if key[pygame.K_p] and self.cooldown_ataque == 0:
-                    self.atacar(superficie, alvo, 4)
+                    movendo = True
 
-        self.vel_y += gravidade
+                if teclas[pygame.K_UP] and not self.pulando:
+                    self.vel_y = -18
+                    self.pulando = True
+                    self.set_action("pulando")
+
+                if teclas[pygame.K_o]:
+                    self.atacar("soco", alvo)
+                elif teclas[pygame.K_p]:
+                    self.atacar("chute", alvo)
+
+        if movendo and not self.pulando and not self.atacando:
+            self.set_action("andando")
+        elif not self.pulando and not self.atacando:
+            self.set_action("parado")
+
+        self.vel_y += 1
         dy += self.vel_y
 
-        if self.rect.bottom + dy > tela_altura - 205:
-            dy = tela_altura - 205 - self.rect.bottom
+        chao = 395
+        if self.rect.bottom + dy > chao:
+            dy = chao - self.rect.bottom
             self.vel_y = 0
-            self.pulo = False
-
-        if self.vida <= 0:
-            self.vivo = False
-            self.action = 5
+            self.pulando = False
 
         self.rect.x += dx
         self.rect.y += dy
 
-    # --------------------------------------------------
-    def atacar(self, superficie, alvo, tipo):
-        self.atacando = True
-        self.cooldown_ataque = 30
-        self.action = tipo
-        self.frame_index = 0
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.right > largura:
+            self.rect.right = largura
 
-        ataque_rect = pygame.Rect(
-            self.rect.centerx - (2 * self.rect.width * self.virar),
-            self.rect.y,
-            2 * self.rect.width,
-            self.rect.height
+        if self.jogador == 1:
+            self.flip = self.rect.centerx > alvo.rect.centerx
+        else:
+            self.flip = self.rect.centerx < alvo.rect.centerx
+
+    # --------------------------------------------------
+
+    def atacar(self, tipo, alvo):
+        tempo_atual = pygame.time.get_ticks()
+
+        if self.atacando:
+            return
+
+        if tempo_atual - self.ultimo_ataque < self.tempo_cooldown:
+            return
+
+        self.atacando = True
+        self.ultimo_ataque = tempo_atual
+        self.frame_index = 0
+        self.set_action(tipo)
+
+        # -------- HITBOX CORRETA PARA CADA SPRITE BASE
+        if self.jogador == 1:
+            offset = 40 if not self.flip else -40
+        else:
+            offset = -40 if not self.flip else 40
+
+        hitbox = pygame.Rect(
+            self.rect.centerx + offset,
+            self.rect.y + 40,
+            40,
+            80
         )
 
-        if ataque_rect.colliderect(alvo.rect):
+        if hitbox.colliderect(alvo.rect):
             alvo.vida -= 10
+            if alvo.vida <= 0:
+                alvo.vivo = False
+                alvo.atacando = False
+                alvo.pulando = False
+                alvo.vel_y = 0
+                alvo.set_action("morte")
 
     # --------------------------------------------------
-    def desenho(self, superficie):
-        self.update_animation()
 
-        img = pygame.transform.flip(self.image, self.virar, False)
-        superficie.blit(img, self.rect)
+    def set_action(self, nova):
+        if self.action != nova:
+            self.action = nova
+            self.frame_index = 0
+            self.update_time = pygame.time.get_ticks()
+
+    # --------------------------------------------------
+
+    def atualizar_animacao(self):
+        if not self.vivo:
+            self.image = self.animacoes["morte"][0]
+            return
+
+        tempo = 180
+        self.image = self.animacoes[self.action][self.frame_index]
+
+        if pygame.time.get_ticks() - self.update_time > tempo:
+            self.frame_index += 1
+            self.update_time = pygame.time.get_ticks()
+
+            if self.frame_index >= len(self.animacoes[self.action]):
+                self.frame_index = 0
+                if self.action in ["soco", "chute"]:
+                    self.atacando = False
+                    self.set_action("parado")
+
+    # --------------------------------------------------
+
+    def desenho(self, screen):
+        self.atualizar_animacao()
+        img = pygame.transform.flip(self.image, self.flip, False)
+        screen.blit(img, self.rect)
