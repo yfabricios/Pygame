@@ -142,8 +142,8 @@ while rodando:
                 intro_contador = -1
 
         else:
-            personagem_1.move(tela_largura, tela_altura, screen, personagem_2, round_fim)
-            personagem_2.move(tela_largura, tela_altura, screen, personagem_1, round_fim)
+            personagem_1.move(tela_largura, tela_altura, personagem_2, round_fim)
+            personagem_2.move(tela_largura, tela_altura, personagem_1, round_fim)
 
         personagem_1.desenho(screen)
         personagem_2.desenho(screen)
@@ -154,37 +154,23 @@ while rodando:
                 pontuacao[1] += 1
                 round_fim = True
                 round_fim_tempo = pygame.time.get_ticks()
-
             elif not personagem_2.vivo:
                 pontuacao[0] += 1
                 round_fim = True
                 round_fim_tempo = pygame.time.get_ticks()
         else:
-            texto_vitoria = vitoria_fonte.render("VICTORY", True, amarelo)
-            screen.blit(texto_vitoria, texto_vitoria.get_rect(center=(tela_largura // 2, tela_altura // 4)))
+            texto_vitoria = vitoria_fonte.render("VICTORY", True, vermelho)
+            screen.blit(texto_vitoria, texto_vitoria.get_rect(center=(tela_largura // 2, tela_altura // 5)))
 
             if pygame.time.get_ticks() - round_fim_tempo >= round_contador:
                 round_fim = False
                 intro_contador = 5
                 mostrar_fight = False
                 last_contador_uptade = pygame.time.get_ticks()
-
-                personagem_1.vida = 100
-                personagem_2.vida = 100
-                personagem_1.vivo = True
-                personagem_2.vivo = True
-
-                chao = 395
-                personagem_1.rect.bottom = chao
-                personagem_2.rect.bottom = chao
-
-                personagem_1.rect.x = 100
-                personagem_2.rect.x = 800
-
-                personagem_1.vel_y = 0
-                personagem_2.vel_y = 0
-                personagem_1.pulando = False
-                personagem_2.pulando = False
+                
+                # Resetando usando o novo método
+                personagem_1.reset(100, 215)
+                personagem_2.reset(800, 215)
 
     pygame.display.update()
 

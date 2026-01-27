@@ -4,7 +4,11 @@ class Personagens():
     def __init__(self, x, y, jogador, sprite_sheet, vida):
         self.jogador = jogador
         self.sprite_sheet = sprite_sheet
+        self.vida_maxima = vida
         self.vida = vida
+        # Guardar posição inicial para o reset
+        self.pos_inicial_x = x
+        self.pos_inicial_y = y
 
         self.frame_largura = 80
         self.frame_altura = 180
@@ -18,19 +22,15 @@ class Personagens():
         self.pulando = False
         self.atacando = False
         self.vivo = True
-        self.tempo_cooldown = 800
+        self.tempo_cooldown = 600
         self.ultimo_ataque = 0
 
         self.rect = pygame.Rect(x, y, 80, 180)
-
         self.animacoes = self.carregar_animacoes()
         self.image = self.animacoes[self.action][self.frame_index]
 
-    # --------------------------------------------------
-
     def carregar_animacoes(self):
         anim = {}
-
         def pegar_frames(linha, inicio, fim):
             frames = []
             for i in range(inicio, fim + 1):
@@ -57,25 +57,15 @@ class Personagens():
             anim["soco"]    = pegar_frames(0, 7, 9)
             anim["chute"]   = pegar_frames(1, 0, 4)
             anim["morte"]   = pegar_frames(1, 5, 5)
-
         return anim
 
-    # --------------------------------------------------
-
-    def move(self, largura, altura, screen, alvo, round_fim):
-        if round_fim:
-            self.vel_y = 0
-            self.pulando = False
-            self.rect.bottom = 395
-            return
-
-        if not self.vivo:
+    def move(self, largura, altura, alvo, round_fim):
+        if round_fim or not self.vivo:
             return
 
         velocidade = 6
         dx = 0
         dy = 0
-
         teclas = pygame.key.get_pressed()
         movendo = False
 
@@ -87,17 +77,13 @@ class Personagens():
                 elif teclas[pygame.K_d]:
                     dx = velocidade
                     movendo = True
-
                 if teclas[pygame.K_w] and not self.pulando:
                     self.vel_y = -18
                     self.pulando = True
-                    self.set_action("pulando")
-
                 if teclas[pygame.K_r]:
                     self.atacar("soco", alvo)
                 elif teclas[pygame.K_t]:
                     self.atacar("chute", alvo)
-
             else:
                 if teclas[pygame.K_LEFT]:
                     dx = -velocidade
@@ -105,25 +91,29 @@ class Personagens():
                 elif teclas[pygame.K_RIGHT]:
                     dx = velocidade
                     movendo = True
-
                 if teclas[pygame.K_UP] and not self.pulando:
                     self.vel_y = -18
                     self.pulando = True
-                    self.set_action("pulando")
-
                 if teclas[pygame.K_o]:
                     self.atacar("soco", alvo)
                 elif teclas[pygame.K_p]:
                     self.atacar("chute", alvo)
 
-        if movendo and not self.pulando and not self.atacando:
+        # Definir animação de movimento
+        if self.pulando:
+            self.set_action("pulando")
+        elif self.atacando:
+            pass # Mantém a animação de ataque
+        elif movendo:
             self.set_action("andando")
-        elif not self.pulando and not self.atacando:
+        else:
             self.set_action("parado")
 
+        # Gravidade
         self.vel_y += 1
         dy += self.vel_y
 
+        # Colisão com o chão
         chao = 395
         if self.rect.bottom + dy > chao:
             dy = chao - self.rect.bottom
@@ -133,62 +123,56 @@ class Personagens():
         self.rect.x += dx
         self.rect.y += dy
 
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > largura:
-            self.rect.right = largura
+        # Limites da tela
+        if self.rect.left < 0: self.rect.left = 0
+        if self.rect.right > largura: self.rect.right = largura
+
+        distancia = self.rect.centerx - alvo.rect.centerx
+        
+        # Se distancia > 0, eu estou na DIREITA do alvo (devo olhar para esquerda)
+        # Se distancia < 0, eu estou na ESQUERDA do alvo (devo olhar para direita)
 
         if self.jogador == 1:
-            self.flip = self.rect.centerx > alvo.rect.centerx
+            self.flip = distancia > 0
         else:
-            self.flip = self.rect.centerx < alvo.rect.centerx
+            self.flip = distancia < 0
 
-    # --------------------------------------------------
+    def atacar(self, tipo, alvo):
+        tempo_atual = pygame.time.get_ticks()
+        if self.atacando or (tempo_atual - self.ultimo_ataque < self.tempo_cooldown):
+            return
 
-def atacar(self, tipo, alvo):
-    tempo_atual = pygame.time.get_ticks()
+        self.atacando = True
+        self.ultimo_ataque = tempo_atual
+        self.set_action(tipo)
 
-    if self.atacando:
-        return
+        largura_hitbox = 30 # Ajuste o alcance aqui
+        
+        # Determinar se o personagem está olhando para a direita ou esquerda no momento
+        # Para o P1: flip False = Direita, flip True = Esquerda
+        # Para o P2: flip False = Esquerda, flip True = Direita
+        
+        olhando_para_direita = False
+        if self.jogador == 1:
+            olhando_para_direita = not self.flip
+        else:
+            olhando_para_direita = self.flip
 
-    if tempo_atual - self.ultimo_ataque < self.tempo_cooldown:
-        return
+        # Cálculo da posição X da hitbox
+        if olhando_para_direita:
+            hitbox_x = self.rect.right
+        else:
+            hitbox_x = self.rect.left - largura_hitbox
 
-    self.atacando = True
-    self.ultimo_ataque = tempo_atual
-    self.frame_index = 0
-    self.set_action(tipo)
+        hitbox = pygame.Rect(hitbox_x, self.rect.y + 50, largura_hitbox, 80)
 
-    largura_hitbox = 40
-    altura_hitbox = 80
-    y_hitbox = self.rect.y + 40
-
-    alcance = 20  # <<< AJUSTE FINO DO ALCANCE
-
-    if not self.flip:
-        # olhando para a direita
-        hitbox_x = self.rect.right - alcance
-    else:
-        # olhando para a esquerda
-        hitbox_x = self.rect.left - largura_hitbox + alcance
-
-    hitbox = pygame.Rect(
-        hitbox_x,
-        y_hitbox,
-        largura_hitbox,
-        altura_hitbox
-    )
-
-    if hitbox.colliderect(alvo.rect):
-        alvo.vida -= 10
-        if alvo.vida <= 0:
-            alvo.vivo = False
-            alvo.atacando = False
-            alvo.pulando = False
-            alvo.vel_y = 0
-            alvo.set_action("morte")
-
-    # --------------------------------------------------
+        # Verificação de colisão
+        if hitbox.colliderect(alvo.rect):
+            alvo.vida -= 10
+            if alvo.vida <= 0:
+                alvo.vida = 0
+                alvo.vivo = False
+                alvo.set_action("morte")
 
     def set_action(self, nova):
         if self.action != nova:
@@ -196,27 +180,31 @@ def atacar(self, tipo, alvo):
             self.frame_index = 0
             self.update_time = pygame.time.get_ticks()
 
-    # --------------------------------------------------
-
     def atualizar_animacao(self):
-        if not self.vivo:
-            self.image = self.animacoes["morte"][0]
-            return
-
-        tempo = 180
+        tempo_frame = 120 # Velocidade da animação
         self.image = self.animacoes[self.action][self.frame_index]
-
-        if pygame.time.get_ticks() - self.update_time > tempo:
+        
+        if pygame.time.get_ticks() - self.update_time > tempo_frame:
             self.frame_index += 1
             self.update_time = pygame.time.get_ticks()
-
+            
             if self.frame_index >= len(self.animacoes[self.action]):
-                self.frame_index = 0
-                if self.action in ["soco", "chute"]:
-                    self.atacando = False
-                    self.set_action("parado")
+                if not self.vivo:
+                    self.frame_index = len(self.animacoes[self.action]) - 1 # Trava no último frame da morte
+                else:
+                    self.frame_index = 0
+                    if self.action in ["soco", "chute"]:
+                        self.atacando = False
 
-    # --------------------------------------------------
+    def reset(self, x, y):
+        self.vida = self.vida_maxima
+        self.vivo = True
+        self.atacando = False
+        self.pulando = False
+        self.vel_y = 0
+        self.rect.x = x
+        self.rect.y = y
+        self.set_action("parado")
 
     def desenho(self, screen):
         self.atualizar_animacao()
