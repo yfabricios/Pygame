@@ -69,6 +69,7 @@ class Personagens():
         teclas = pygame.key.get_pressed()
         movendo = False
 
+        # Só permite comandos se não estiver atacando
         if not self.atacando:
             if self.jogador == 1:
                 if teclas[pygame.K_a]:
@@ -80,9 +81,9 @@ class Personagens():
                 if teclas[pygame.K_w] and not self.pulando:
                     self.vel_y = -18
                     self.pulando = True
-                if teclas[pygame.K_r]:
+                if teclas[pygame.K_c]:
                     self.atacar("soco", alvo)
-                elif teclas[pygame.K_t]:
+                elif teclas[pygame.K_v]:
                     self.atacar("chute", alvo)
             else:
                 if teclas[pygame.K_LEFT]:
@@ -99,11 +100,11 @@ class Personagens():
                 elif teclas[pygame.K_p]:
                     self.atacar("chute", alvo)
 
-        # Definir animação de movimento
-        if self.pulando:
+        # Gerenciamento de Animações (Prioridade para o ataque)
+        if self.atacando:
+            pass # Deixa a animação de soco/chute rodar até o fim
+        elif self.pulando:
             self.set_action("pulando")
-        elif self.atacando:
-            pass # Mantém a animação de ataque
         elif movendo:
             self.set_action("andando")
         else:
@@ -127,11 +128,8 @@ class Personagens():
         if self.rect.left < 0: self.rect.left = 0
         if self.rect.right > largura: self.rect.right = largura
 
+        # Girar personagem para o alvo
         distancia = self.rect.centerx - alvo.rect.centerx
-        
-        # Se distancia > 0, eu estou na DIREITA do alvo (devo olhar para esquerda)
-        # Se distancia < 0, eu estou na ESQUERDA do alvo (devo olhar para direita)
-
         if self.jogador == 1:
             self.flip = distancia > 0
         else:
@@ -146,29 +144,31 @@ class Personagens():
         self.ultimo_ataque = tempo_atual
         self.set_action(tipo)
 
-        largura_hitbox = 30 # Ajuste o alcance aqui
-        
-        # Determinar se o personagem está olhando para a direita ou esquerda no momento
-        # Para o P1: flip False = Direita, flip True = Esquerda
-        # Para o P2: flip False = Esquerda, flip True = Direita
-        
-        olhando_para_direita = False
-        if self.jogador == 1:
-            olhando_para_direita = not self.flip
-        else:
-            olhando_para_direita = self.flip
+        # Hitboxes diferenciadas
+        if tipo == "chute":
+            largura_hitbox = 60
+            altura_hitbox = 40
+            offset_y = 100
+        else: # soco
+            largura_hitbox = 30
+            altura_hitbox = 80
+            offset_y = 50
 
-        # Cálculo da posição X da hitbox
+        olhando_para_direita = (not self.flip) if self.jogador == 1 else self.flip
+
         if olhando_para_direita:
             hitbox_x = self.rect.right
         else:
             hitbox_x = self.rect.left - largura_hitbox
 
-        hitbox = pygame.Rect(hitbox_x, self.rect.y + 50, largura_hitbox, 80)
+        hitbox = pygame.Rect(hitbox_x, self.rect.y + offset_y, largura_hitbox, altura_hitbox)
 
-        # Verificação de colisão
         if hitbox.colliderect(alvo.rect):
-            alvo.vida -= 10
+            if tipo == "soco":
+                alvo.vida -= 9
+            elif tipo == "chute":
+                alvo.vida -= 15
+            
             if alvo.vida <= 0:
                 alvo.vida = 0
                 alvo.vivo = False
@@ -181,7 +181,12 @@ class Personagens():
             self.update_time = pygame.time.get_ticks()
 
     def atualizar_animacao(self):
-        tempo_frame = 120 # Velocidade da animação
+        tempo_frame = 120 
+        
+        # Proteção de índice caso a lista de frames mude
+        if self.frame_index >= len(self.animacoes[self.action]):
+            self.frame_index = 0
+
         self.image = self.animacoes[self.action][self.frame_index]
         
         if pygame.time.get_ticks() - self.update_time > tempo_frame:
@@ -190,11 +195,12 @@ class Personagens():
             
             if self.frame_index >= len(self.animacoes[self.action]):
                 if not self.vivo:
-                    self.frame_index = len(self.animacoes[self.action]) - 1 # Trava no último frame da morte
+                    self.frame_index = len(self.animacoes[self.action]) - 1 
                 else:
-                    self.frame_index = 0
-                    if self.action in ["soco", "chute"]:
+                    # Se terminou um ataque, volta a permitir movimento/outras animações
+                    if self.action == "soco" or self.action == "chute":
                         self.atacando = False
+                    self.frame_index = 0
 
     def reset(self, x, y):
         self.vida = self.vida_maxima

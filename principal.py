@@ -19,6 +19,7 @@ preto = (0, 0, 0)
 amarelo = (255, 255, 0)
 vermelho = (255, 0, 0)
 azul = (0, 0, 255)
+cinza = (128, 128, 128)
 
 # --------------------------------------------------
 # Imagens
@@ -46,7 +47,7 @@ vitoria_fonte = pygame.font.Font("Minecraft.ttf", 80)
 # --------------------------------------------------
 # Funções
 def desenho_texto(texto, fonte, cor, x, y):
-    img = fonte.render(texto, True, cor, bgcolor='gray')
+    img = fonte.render(texto, True, cor, cinza)
     screen.blit(img, (x, y))
 
 def tela_menu():
