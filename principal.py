@@ -20,12 +20,13 @@ amarelo = (255, 255, 0)
 vermelho = (255, 0, 0)
 azul = (0, 0, 255)
 cinza = (128, 128, 128)
+cinza_claro = (200, 200, 200)
 
 # --------------------------------------------------
 # Imagens
-vitoria_img = pygame.image.load("Vitoria.png").convert_alpha()
-plano_andamento = pygame.image.load("plano_de_andamento.png").convert()
-
+plano_andamento = pygame.image.load("Andamento.png").convert()
+plano_menu = pygame.image.load("Menu.png").convert()
+escala_menu = pygame.transform.scale(plano_menu, (tela_largura, tela_altura))
 # --------------------------------------------------
 # Variáveis do jogo
 intro_contador = 5
@@ -41,7 +42,7 @@ round_fim_tempo = 0
 # Fontes
 contador_fonte = pygame.font.Font("Minecraft.ttf", 80)
 pontuacao_fonte = pygame.font.Font("Minecraft.ttf", 30)
-fonte = pygame.font.SysFont(None, 40)
+fonte = pygame.font.Font("Minecraft.ttf", 40)
 vitoria_fonte = pygame.font.Font("Minecraft.ttf", 80)
 
 # --------------------------------------------------
@@ -51,9 +52,23 @@ def desenho_texto(texto, fonte, cor, x, y):
     screen.blit(img, (x, y))
 
 def tela_menu():
-    screen.fill(ciano)
-    pygame.draw.rect(screen, branco, botao_jogar)
-    pygame.draw.rect(screen, branco, botao_sair)
+    screen.blit(escala_menu, (0, 0))
+
+    posicao_mouse = pygame.mouse.get_pos()
+
+# botão JOGAR (Troca de cor no hover)
+    if botao_jogar.collidepoint(posicao_mouse):
+        cor_jogar = cinza_claro
+    else:
+        cor_jogar = branco 
+        
+    if botao_sair.collidepoint(posicao_mouse):
+        cor_sair = cinza_claro
+    else:
+        cor_sair = branco
+
+    pygame.draw.rect(screen, cor_jogar, botao_jogar)
+    pygame.draw.rect(screen, cor_sair, botao_sair)
 
     texto_jogar = fonte.render("JOGAR", True, preto)
     texto_sair = fonte.render("SAIR", True, preto)
