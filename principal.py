@@ -1,4 +1,3 @@
-from turtle import bgcolor
 import pygame
 from personagens import Personagens
 
@@ -19,7 +18,7 @@ preto = (0, 0, 0)
 amarelo = (255, 255, 0)
 vermelho = (255, 0, 0)
 azul = (0, 0, 255)
-cinza = (128, 128, 128)
+cinza = (235, 197, 197)
 cinza_claro = (200, 200, 200)
 
 # --------------------------------------------------
@@ -27,6 +26,7 @@ cinza_claro = (200, 200, 200)
 plano_andamento = pygame.image.load("Andamento.png").convert()
 plano_menu = pygame.image.load("Menu.png").convert()
 escala_menu = pygame.transform.scale(plano_menu, (tela_largura, tela_altura))
+
 # --------------------------------------------------
 # Variáveis do jogo
 intro_contador = 5
@@ -37,6 +37,10 @@ pontuacao = [0, 0]
 round_fim = False
 round_contador = 2000
 round_fim_tempo = 0
+
+# Variáveis para a vitória final
+vencedor_texto = ""
+tempo_vitoria_final = 0
 
 # --------------------------------------------------
 # Fontes
@@ -53,10 +57,8 @@ def desenho_texto(texto, fonte, cor, x, y):
 
 def tela_menu():
     screen.blit(escala_menu, (0, 0))
-
     posicao_mouse = pygame.mouse.get_pos()
 
-# botão JOGAR (Troca de cor no hover)
     if botao_jogar.collidepoint(posicao_mouse):
         cor_jogar = cinza_claro
     else:
@@ -80,7 +82,7 @@ def tela_de_andamento():
     screen.blit(plano_andamento, (0, 0))
 
 def desenhar_barra_vida(vida, x, y):
-    proporcao = vida / 100
+    proporcao = max(0, vida / 100) # Garante que a barra não fique negativa
     pygame.draw.rect(screen, branco, (x - 2, y - 2, 404, 34))
     pygame.draw.rect(screen, vermelho, (x, y, 400, 30))
     pygame.draw.rect(screen, amarelo, (x, y, 400 * proporcao, 30))
@@ -89,6 +91,7 @@ def desenhar_barra_vida(vida, x, y):
 # Estados
 MENU = 0
 JOGO = 1
+VITORIA_FINAL = 2 # Novo estado para a tela de campeão
 estado = MENU
 
 # --------------------------------------------------
@@ -121,6 +124,8 @@ while rodando:
 
         if estado == MENU and evento.type == pygame.MOUSEBUTTONDOWN:
             if botao_jogar.collidepoint(evento.pos):
+                # Resetar pontos ao clicar em Jogar
+                pontuacao = [0, 0]
                 estado = JOGO
             if botao_sair.collidepoint(evento.pos):
                 rodando = False
@@ -164,7 +169,7 @@ while rodando:
         personagem_1.desenho(screen)
         personagem_2.desenho(screen)
 
-        # ---------------- FIM DO ROUND ----------------
+        # ---------------- LÓGICA DE FIM DE ROUND / JOGO ----------------
         if not round_fim:
             if not personagem_1.vivo:
                 pontuacao[1] += 1
@@ -174,9 +179,21 @@ while rodando:
                 pontuacao[0] += 1
                 round_fim = True
                 round_fim_tempo = pygame.time.get_ticks()
+            
+            # Verificar se alguém atingiu 3 pontos
+            if pontuacao[0] >= 3:
+                vencedor_texto = "PLAZER1 WINS!"
+                tempo_vitoria_final = pygame.time.get_ticks()
+                estado = VITORIA_FINAL
+            elif pontuacao[1] >= 3:
+                vencedor_texto = "REIHARD2 WINS!"
+                tempo_vitoria_final = pygame.time.get_ticks()
+                estado = VITORIA_FINAL
+
         else:
-            texto_vitoria = vitoria_fonte.render("VICTORY", True, vermelho)
-            screen.blit(texto_vitoria, texto_vitoria.get_rect(center=(tela_largura // 2, tela_altura // 5)))
+            # Exibe mensagem de vitória do round enquanto espera o reset
+            texto_round = vitoria_fonte.render("VICTORY", True, vermelho)
+            screen.blit(texto_round, texto_round.get_rect(center=(tela_largura // 2, tela_altura // 5)))
 
             if pygame.time.get_ticks() - round_fim_tempo >= round_contador:
                 round_fim = False
@@ -184,9 +201,26 @@ while rodando:
                 mostrar_fight = False
                 last_contador_uptade = pygame.time.get_ticks()
                 
-                # Resetando usando o novo método
                 personagem_1.reset(100, 215)
                 personagem_2.reset(800, 215)
+
+    # ---------------- TELA DE VITÓRIA FINAL (3 PONTOS) ----------------
+    elif estado == VITORIA_FINAL:
+        screen.blit(escala_menu, (0, 0)) # Fundo do menu
+        
+        texto_campeao = vitoria_fonte.render(vencedor_texto, True, amarelo)
+        rect_campeao = texto_campeao.get_rect(center=(tela_largura // 2, tela_altura // 2))
+        screen.blit(texto_campeao, rect_campeao)
+
+        # Espera 5 segundos antes de voltar ao menu
+        if pygame.time.get_ticks() - tempo_vitoria_final >= 5000:
+            # Reset completo para voltar ao menu principal
+            intro_contador = 5
+            mostrar_fight = False
+            round_fim = False
+            personagem_1.reset(100, 215)
+            personagem_2.reset(800, 215)
+            estado = MENU
 
     pygame.display.update()
 

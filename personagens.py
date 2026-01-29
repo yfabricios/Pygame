@@ -162,15 +162,15 @@ class Personagens():
 
         # Definição de Hitboxes e Força de Knockback
         if tipo == "chute":
-            largura_hitbox = 45
+            largura_hitbox = 35
             altura_hitbox = 30
             offset_y = 100
-            forca_knockback = 30 # Empurrão forte
+            forca_knockback = 50 # Empurrão forte
         else: # soco
-            largura_hitbox = 30
+            largura_hitbox = 25
             altura_hitbox = 80
             offset_y = 50
-            forca_knockback = 20 # Empurrão leve
+            forca_knockback = 35 # Empurrão leve
 
         olhando_para_direita = (not self.flip) if self.jogador == 1 else self.flip
 
@@ -185,9 +185,9 @@ class Personagens():
         if hitbox.colliderect(alvo.rect):
             # Aplicar Dano
             if tipo == "soco":
-                alvo.vida -= 100
-            elif tipo == "chute":
                 alvo.vida -= 8
+            elif tipo == "chute":
+                alvo.vida -= 10
             
             # ATIVAR KNOCKBACK E ESTADO DE HIT NO ALVO
             alvo.hit = True
