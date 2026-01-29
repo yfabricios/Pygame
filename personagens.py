@@ -37,32 +37,34 @@ class Personagens():
 
     def carregar_animacoes(self):
         anim = {}
-        def pegar_frames(linha, inicio, fim):
+        def pegar_frames(linha, inicio, fim, off_x=0, off_y=0):
             frames = []
             for i in range(inicio, fim + 1):
-                frame = self.sprite_sheet.subsurface(
-                    i * self.frame_largura,
-                    linha * self.frame_altura,
-                    self.frame_largura,
-                    self.frame_altura
-                )
+                pos_x = (i * self.frame_largura) + off_x
+                pos_y = (linha * self.frame_altura) + off_y
+                largura_recorte = self.frame_largura - off_x
+                altura_recorte = self.frame_altura - off_y
+                
+                frame = self.sprite_sheet.subsurface(pos_x, pos_y, largura_recorte, altura_recorte)
                 frames.append(frame)
             return frames
 
         if self.jogador == 1:
-            anim["parado"]  = pegar_frames(2, 0, 2)
+            anim["parado"]  = pegar_frames(2, 0, 2, off_y=10)
             anim["andando"] = pegar_frames(0, 0, 3)
             anim["pulando"] = pegar_frames(0, 5, 10)
-            anim["soco"]    = pegar_frames(1, 5, 7)
-            anim["chute"]   = pegar_frames(1, 0, 4)
+            anim["soco"]    = pegar_frames(1, 5, 7, off_x=5, off_y=10)
+            anim["chute"]   = pegar_frames(1, 0, 4, off_y=10)
             anim["morte"]   = pegar_frames(0, 4, 4)
         else:
-            anim["parado"]  = pegar_frames(0, 4, 6)
+            # Player 2
+            anim["parado"]  = pegar_frames(0, 4, 6, off_x=10)
             anim["andando"] = pegar_frames(0, 0, 3)
-            anim["pulando"] = pegar_frames(2, 0, 5)
-            anim["soco"]    = pegar_frames(0, 7, 9)
-            anim["chute"]   = pegar_frames(1, 0, 4)
-            anim["morte"]   = pegar_frames(1, 5, 5)
+            # Pulando, Chute e Morte agora com off_x=5
+            anim["pulando"] = pegar_frames(2, 0, 5, off_x=5, off_y=10)
+            anim["soco"]    = pegar_frames(0, 7, 9, off_x=5)
+            anim["chute"]   = pegar_frames(1, 0, 4, off_x=3, off_y=10)
+            anim["morte"]   = pegar_frames(1, 5, 5, off_x=5, off_y=5)
         return anim
 
     def move(self, largura, altura, alvo, round_fim):
@@ -183,7 +185,7 @@ class Personagens():
         if hitbox.colliderect(alvo.rect):
             # Aplicar Dano
             if tipo == "soco":
-                alvo.vida -= 6
+                alvo.vida -= 100
             elif tipo == "chute":
                 alvo.vida -= 8
             
@@ -242,4 +244,33 @@ class Personagens():
     def desenho(self, screen):
         self.atualizar_animacao()
         img = pygame.transform.flip(self.image, self.flip, False)
-        screen.blit(img, self.rect)
+        
+        pos_x = self.rect.x
+        pos_y = self.rect.y
+
+        # --- AJUSTES PLAYER 1 ---
+        if self.jogador == 1:
+            if self.action in ["parado", "soco", "chute"]:
+                pos_y += 10
+            # Se quiser alinhar o soco lateralmente (já que tem off_x=5):
+            if self.action == "soco" and not self.flip:
+                pos_x += 5
+
+        # --- AJUSTES PLAYER 2 ---
+        else:
+            # Ajuste Vertical (Altura)
+            if self.action in ["pulando", "chute"]:
+                pos_y += 10
+            elif self.action == "morte":
+                pos_y += 5
+            
+            # Ajuste Horizontal (Largura)
+            if not self.flip:
+                if self.action == "parado":
+                    pos_x += 10
+                elif self.action in ["soco", "morte", "pulando"]:
+                    pos_x += 5
+                elif self.action == "chute":
+                    pos_x += 3
+
+        screen.blit(img, (pos_x, pos_y))
