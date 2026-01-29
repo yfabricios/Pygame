@@ -91,7 +91,7 @@ def desenhar_barra_vida(vida, x, y):
 # Estados
 MENU = 0
 JOGO = 1
-VITORIA_FINAL = 2 # Novo estado para a tela de campeão
+VITORIA_FINAL = 2 
 estado = MENU
 
 # --------------------------------------------------
@@ -169,7 +169,7 @@ while rodando:
         personagem_1.desenho(screen)
         personagem_2.desenho(screen)
 
-        # ---------------- LÓGICA DE FIM DE ROUND / JOGO ----------------
+        # ---------------- FIM DE ROUND / JOGO ----------------
         if not round_fim:
             if not personagem_1.vivo:
                 pontuacao[1] += 1
@@ -214,7 +214,7 @@ while rodando:
 
         # Espera 5 segundos antes de voltar ao menu
         if pygame.time.get_ticks() - tempo_vitoria_final >= 5000:
-            # Reset completo para voltar ao menu principal
+            # Reset completo para voltar ao menu
             intro_contador = 5
             mostrar_fight = False
             round_fim = False

@@ -11,9 +11,11 @@ class Personagens():
         self.pos_inicial_x = x
         self.pos_inicial_y = y
 
+        #dimensões do frame
         self.frame_largura = 80
         self.frame_altura = 180
 
+        #ações e animações
         self.action = "parado"
         self.frame_index = 0
         self.update_time = pygame.time.get_ticks()
@@ -25,11 +27,11 @@ class Personagens():
         self.vivo = True
         
         # --- SISTEMA DE COOLDOWN E HIT ---
-        self.tempo_cooldown = 1000  # 1 segundo de intervalo entre ataques
+        self.tempo_cooldown = 1000  # cooldown entre ataques
         self.ultimo_ataque = 0
-        self.hit = False            # Indica se o personagem levou um golpe
+        self.hit = False            # verifica se o personagem levou um golpe
         self.tempo_hit = 0          # Momento em que levou o golpe
-        self.duracao_hit = 400      # Tempo (ms) que fica travado ao apanhar
+        self.duracao_hit = 400      # Tempo (ms) que fica travado ao ser acertado
 
         self.rect = pygame.Rect(x, y, 80, 180)
         self.animacoes = self.carregar_animacoes()
@@ -60,7 +62,6 @@ class Personagens():
             # Player 2
             anim["parado"]  = pegar_frames(0, 4, 6, off_x=10)
             anim["andando"] = pegar_frames(0, 0, 3)
-            # Pulando, Chute e Morte agora com off_x=5
             anim["pulando"] = pegar_frames(2, 0, 5, off_x=5, off_y=10)
             anim["soco"]    = pegar_frames(0, 7, 9, off_x=5)
             anim["chute"]   = pegar_frames(1, 0, 4, off_x=3, off_y=10)
@@ -71,7 +72,7 @@ class Personagens():
         if round_fim or not self.vivo:
             return
 
-        # Gerenciar recuperação do estado de Hit (atordoamento)
+        # recuperação do estado de Hit
         tempo_atual = pygame.time.get_ticks()
         if self.hit:
             if tempo_atual - self.tempo_hit > self.duracao_hit:
@@ -83,7 +84,7 @@ class Personagens():
         teclas = pygame.key.get_pressed()
         movendo = False
 
-        # Só permite comandos se NÃO estiver atacando E NÃO estiver atordoado (hit)
+        # Só permite ações se não estiver atacando e não estiver em estado de hit
         if not self.atacando and not self.hit:
             if self.jogador == 1:
                 if teclas[pygame.K_a]:
@@ -114,7 +115,7 @@ class Personagens():
                 elif teclas[pygame.K_p]:
                     self.atacar("chute", alvo)
 
-        # Gerenciamento de Animações
+        # Animações
         if self.atacando:
             pass 
         elif self.pulando:
@@ -135,7 +136,7 @@ class Personagens():
             self.vel_y = 0
             self.pulando = False
 
-        # Aplicar movimento
+        #  movimento
         self.rect.x += dx
         self.rect.y += dy
 
@@ -160,17 +161,17 @@ class Personagens():
         self.ultimo_ataque = tempo_atual
         self.set_action(tipo)
 
-        # Definição de Hitboxes e Força de Knockback
+        # Hitboxes e Força de Knockback
         if tipo == "chute":
             largura_hitbox = 35
             altura_hitbox = 30
             offset_y = 100
-            forca_knockback = 50 # Empurrão forte
+            forca_knockback = 50 # knockback forte
         else: # soco
             largura_hitbox = 25
             altura_hitbox = 80
             offset_y = 50
-            forca_knockback = 35 # Empurrão leve
+            forca_knockback = 35 # knockback leve
 
         olhando_para_direita = (not self.flip) if self.jogador == 1 else self.flip
 
@@ -183,17 +184,17 @@ class Personagens():
 
         # Verificação de colisão com o alvo
         if hitbox.colliderect(alvo.rect):
-            # Aplicar Dano
+            # defnir Dano
             if tipo == "soco":
                 alvo.vida -= 8
             elif tipo == "chute":
                 alvo.vida -= 10
             
-            # ATIVAR KNOCKBACK E ESTADO DE HIT NO ALVO
+            # ativar knocback e estado de hit no alvo
             alvo.hit = True
             alvo.tempo_hit = pygame.time.get_ticks()
             
-            # Se o atacante estiver à esquerda, empurra para a direita, senão para esquerda
+            # Se o atacante estiver à esquerda, empurra para a direita, caso contrario para esquerda
             if self.rect.centerx < alvo.rect.centerx:
                 alvo.rect.x += forca_knockback
             else:
@@ -252,7 +253,7 @@ class Personagens():
         if self.jogador == 1:
             if self.action in ["parado", "soco", "chute"]:
                 pos_y += 10
-            # Se quiser alinhar o soco lateralmente (já que tem off_x=5):
+            # alinhar o soco lateralmente :
             if self.action == "soco" and not self.flip:
                 pos_x += 5
 
